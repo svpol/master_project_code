@@ -1,0 +1,1 @@
+The files FMP_optimized.Rmd and master_project_code.R have the same code, but the syntax highlight is different, the more visually convenient variant may be used. 
