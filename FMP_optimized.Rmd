@@ -40,8 +40,6 @@ plan(sequential)
 
 # Data load
 
-Loading the datasets as lists of Seurat objects.
-
 This function will be used to collapse gene names into one row: e.g. GENE1, GENE1.1, GENE1.2, GENE1.1.2.1 will be collapsed to GENE1 and the median value will be taken for each cell.
 
 ```{r collapse_gene_names}
@@ -573,7 +571,7 @@ seurat_list_all <- lapply(seurat_list_all, add_patient_metadata, meta_full)
 
 # QC
 
-For each Seurat object, filtering out cells with < 100 and > 2500 genes and with > 10% of mitochondrial content:
+For each Seurat object, filtering out cells with < 100 and > 2500 genes (> 7000 genes for GSE148673) and with > 10% of mitochondrial content:
 
 ```{r qc_func}
 filter_min <- function(seu) {
@@ -848,9 +846,7 @@ saveRDS(integrated_all_harmony, file = "integrated161529_176078_167036_LamPD1_11
 ```
 
 
-# UMAP
-
-## UMAP Merged
+# UMAP Merged
 
 
 ```{r pc_merged}
@@ -896,10 +892,10 @@ merged_all <- RunUMAP(object = merged_all, dims = 1:co3_merged, verbose = F)
 ```
 
 
-## UMAP RPCA
+# Number of dims for UMAP - RPCA
 
 ```{r pc_integrated_rpca}
-# integrated_all_rpca <- readRDS('integrated161529_176078_167036_LamPD1_114727_110686_GSE148673_rpca.rds')
+integrated_all_rpca <- readRDS('integrated161529_176078_167036_LamPD1_114727_110686_GSE148673_rpca.rds')
 
 # Extract the PC matrix from the integrated reduction
 pc_matrix_rpca <- Embeddings(integrated_all_rpca, reduction = "rpca_integrated")
@@ -918,6 +914,7 @@ co2_rpca <- sort(which((pct_var_rpca[1:length(pct_var_rpca)-1] -
            decreasing = TRUE)[1] + 1
 co3_rpca <- min(co1_rpca, co2_rpca) # 33
 ```
+
 
 Elbow plot:
 
@@ -946,25 +943,11 @@ ggplot(elbow_df_rpca, aes(x = PC, y = Variance)) +
 ```
 
 
+# Number of dims for UMAP - Harmony
 
-UMAP RPCA:
-
-
-```{r umap_rpca}
-integrated_all_rpca <- FindNeighbors(integrated_all_rpca, dims = 1:co3_rpca, 
-                                        verbose = F, reduction = "rpca_integrated")
-integrated_all_rpca <- FindClusters(integrated_all_rpca, verbose = F, resolution = 0.2)
-integrated_all_rpca <- RunUMAP(integrated_all_rpca, dims = 1:co3_rpca, 
-                                  verbose = F, reduction = "rpca_integrated")
-```
-
-
-## UMAP Harmony
-
-Before running UMAP, calculate the optimal number of PCs:
 
 ```{r pc_integrated_harmony}
-# integrated_all_harmony <- readRDS('integrated161529_176078_167036_LamPD1_114727_110686_GSE148673_harmony.rds')
+integrated_all_harmony <- readRDS('integrated161529_176078_167036_LamPD1_114727_110686_GSE148673_harmony.rds')
 
 # Extract the PC matrix from the integrated reduction
 pc_matrix_harmony <- Embeddings(integrated_all_harmony, reduction = "harmony")
@@ -997,7 +980,24 @@ ggplot(elbow_df_harmony, aes(x = PC, y = Variance)) +
     x = "PC", y = "Variance Explained") + theme_minimal()
 ```
 
-Run UMAP pipeline:
+
+# Correlation between RPCA and Harmony
+
+```{r integration_corr}
+# Correlation between SDs
+cor(pc_stdev_rpca, pc_stdev_harmony)
+```
+
+
+# UMAP RPCA and Harmony
+
+```{r umap_rpca}
+integrated_all_rpca <- FindNeighbors(integrated_all_rpca, dims = 1:co3_rpca, 
+                                        verbose = F, reduction = "rpca_integrated")
+integrated_all_rpca <- FindClusters(integrated_all_rpca, verbose = F, resolution = 0.2)
+integrated_all_rpca <- RunUMAP(integrated_all_rpca, dims = 1:co3_rpca, 
+                                  verbose = F, reduction = "rpca_integrated")
+```
 
 ```{r umap_integrated}
 integrated_all_harmony <- FindNeighbors(integrated_all_harmony, dims = 1:co3_harmony, 
@@ -1006,6 +1006,8 @@ integrated_all_harmony <- FindClusters(integrated_all_harmony, verbose = F, reso
 integrated_all_harmony <- RunUMAP(integrated_all_harmony, dims = 1:co3_harmony, 
                                   verbose = F, reduction = "harmony")
 ```
+
+
 
 # Results
 

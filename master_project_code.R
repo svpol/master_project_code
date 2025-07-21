@@ -19,6 +19,7 @@ plan(sequential)
 
 
 # Data load
+
 # This function will be used to collapse gene names into one row: 
 # e.g. GENE1, GENE1.1, GENE1.2, GENE1.1.2.1 will be collapsed to GENE1 and the median value will be taken for each cell.
 
@@ -49,7 +50,8 @@ collapse_by_median <- function(mat) {
 }
 
 
-# Load GSE161529
+# Load GSE161529:
+  
 
 # # Make symbol gene names unique
 # features161529 <- read.delim('GSE161529/GSE161529_features.tsv', header = FALSE)
@@ -119,12 +121,12 @@ count_list_161529 <- mapply(
   SIMPLIFY = FALSE
 )
 
-# Check that gene names are the same and in the same order
-ref_rownames161529 <- rownames(count_list_161529[[1]])
-all(sapply(count_list_161529, function(mat) {
-  identical(rownames(mat), ref_rownames161529)
-}))
-# TRUE
+# # Check that gene names are the same and in the same order
+# ref_rownames161529 <- rownames(count_list_161529[[1]])
+# all(sapply(count_list_161529, function(mat) {
+#   identical(rownames(mat), ref_rownames161529)
+# }))
+# # TRUE
 
 # Combine into a single matrix and make a Seurat object 
 counts_161529 <- do.call(cbind, count_list_161529)
@@ -135,8 +137,9 @@ rm(count_list_161529)
 rm(counts_161529)
 
 
-# Load GSE176078
+# Load GSE176078:
   
+
 archive_paths176078 <- list.files("GSE176078/GSE176078_RAW/", pattern = "*.tar.gz$", full.names = TRUE)
 
 excluded_samples176078 <- c("CID3963", "CID4066", "CID4398", "CID4513", "CID4523")
@@ -182,12 +185,12 @@ for (archive in archive_paths176078) {
   unlink(extract_dir, recursive = TRUE)
 }
 
-# Check that gene names are the same and in the same order
-ref_rownames176078 <- rownames(count_list_176078[[1]])
-all(sapply(count_list_176078, function(mat) {
-  identical(rownames(mat), ref_rownames176078)
-}))
-# TRUE
+# # Check that gene names are the same and in the same order
+# ref_rownames176078 <- rownames(count_list_176078[[1]])
+# all(sapply(count_list_176078, function(mat) {
+#   identical(rownames(mat), ref_rownames176078)
+# }))
+# # TRUE
 
 # Make a single matrix
 counts_176078 <- do.call(cbind, count_list_176078)
@@ -202,6 +205,7 @@ gc()
 
 # Load GSE167036:
   
+
 # Load count matrix
 counts167036 <- readMM("GSE167036/GSE167036_cell_counts_matrix.mtx")
 features167036 <- read.csv("GSE167036/GSE167036_features.csv")
@@ -334,12 +338,12 @@ read_sample_matrix_114727 <- function(sample) {
 
 count_list_114727 <- lapply(sample_names114727, read_sample_matrix_114727)
 
-# Check that genes are the same and in the same oder in all matrice
-ref_rownames114727 <- rownames(count_list_114727[[1]])
-all(sapply(count_list_114727, function(mat) {
-  identical(rownames(mat), ref_rownames114727)
-}))
-# TRUE
+# # Check that genes are the same and in the same oder in all matrice
+# ref_rownames114727 <- rownames(count_list_114727[[1]])
+# all(sapply(count_list_114727, function(mat) {
+#   identical(rownames(mat), ref_rownames114727)
+# }))
+# # TRUE
 
 # Combine all samples into a single sparse matrix
 counts_114727 <- do.call(cbind, count_list_114727)
@@ -409,9 +413,9 @@ count_list_110686 <- mapply(
   SIMPLIFY = FALSE
 )
 
-# Check that gene names are the same and in the same order
-all(rownames(count_list_110686[[1]]) == rownames(count_list_110686[[2]]))
-# [1] TRUE
+# # Check that gene names are the same and in the same order
+# all(rownames(count_list_110686[[1]]) == rownames(count_list_110686[[2]]))
+# # [1] TRUE
 
 # Combine all into a single matrix
 counts_110686 <- do.call(cbind, count_list_110686)
@@ -435,6 +439,7 @@ rm(count_list_110686)
 
 # Load GSE148673:
   
+
 files148673 <- list.files('GSE148673/counts/', full.names = TRUE)
 
 # Initialize a list to store matrices
@@ -476,12 +481,12 @@ fill_missing_genes_148673 <- function(mat) {
 
 expr_list148673_filled <- lapply(expr_list148673, fill_missing_genes_148673)
 
-ref_rownames148673 <- rownames(expr_list148673_filled[[1]])
-all(sapply(expr_list148673_filled, function(mat) {
-  identical(rownames(mat), ref_rownames148673)
-}))
-# TRUE
-
+# ref_rownames148673 <- rownames(expr_list148673_filled[[1]])
+# all(sapply(expr_list148673_filled, function(mat) {
+#   identical(rownames(mat), ref_rownames148673)
+# }))
+# # TRUE
+# 
 counts_148673 <- do.call(cbind, expr_list148673_filled)
 
 # # Create Seurat v5 object
@@ -494,9 +499,9 @@ rm(expr_list148673_filled)
 
 
 
-# Make a single list of Seurat objects
-  
 
+# Make a single list of Seurat objects:
+  
 seurat_list_all <- list(GSE161529, GSE176078, GSE167036, LambrechtPD1, 
                         GSE114727, GSE110686, GSE148673)
 names(seurat_list_all) <- c('GSE161529', 'GSE176078', 'GSE167036', 'LambrechtPD1', 
@@ -517,14 +522,12 @@ gc()
 
 
 # seurat_list_all <- readRDS('GSE161529_GSE176078_GSE167036_LambrechtPD1_GSE114727_GSE110686_GSE148673.rds')
-
-# Read metadata
 meta_full <- read.csv('meta.csv', sep=';', row.names = 1)
 rownames(meta_full) <- gsub("_", "-", rownames(meta_full))
 meta_full$Dataset_ID <- NULL
 
 
-# Add metadata to each dataset (Seurat list element)
+
 add_patient_metadata <- function(seu, metadata_df) {
   meta <- seu@meta.data
   meta$.__cell_barcode__ <- rownames(meta)
@@ -545,9 +548,10 @@ seurat_list_all <- lapply(seurat_list_all, add_patient_metadata, meta_full)
 
 # QC
 
-# For each Seurat object, filtering out cells with < 100 and > 2500 genes ( > 7000 for GSE148673) 
+# For each Seurat object, filtering out cells with < 100 and > 2500 genes (> 7000 genes for GSE148673)
 # and with > 10% of mitochondrial content:
   
+
 filter_min <- function(seu) {
   # Filter out cells with < 100 genes expressed
   seu <- subset(seu, subset = nFeature_RNA >= 100)
@@ -565,7 +569,7 @@ filter_mito <- function(seu) {
 }
 
 filter_max <- function(seu) {
-  # Filter out cells with > 2500 (7000 for GSE148673) genes expressed
+  # Filter out cells with > 2500 genes expressed
   dataset_id <- seu@project.name
   if (dataset_id == "GSE148673") {
     seu <- subset(seu, subset = nFeature_RNA <= 7000)
@@ -591,7 +595,7 @@ filter_2sd <- function(seu) {
 }
 
 
-# Apply QC functions
+
 seurat_list_min <- lapply(seurat_list_all, filter_min)
 seurat_list_mito <- lapply(seurat_list_min, filter_mito)
 seurat_list_max <- lapply(seurat_list_mito, filter_max)
@@ -603,7 +607,7 @@ saveRDS(seurat_list_2sd,
         "GSE161529_GSE176078_GSE167036_LambrechtPD1_GSE114727_GSE110686_GSE148673_list_qc.rds")
 
 
-# QC stats
+## QC stats
 
 # Stats by dataset:
   
@@ -657,7 +661,7 @@ ggplot(cell_count_long, aes(x = qc_step, y = percentage, fill = qc_step)) +
 
 
 
-# Calculate number of samples
+# Number of samples:
   
 get_sample_counts <- function(seu) {
   data.frame(
@@ -674,7 +678,6 @@ write.xlsx(cell_sample_count, file = "QC.xlsx", sheetName = "dataset_untreated",
 
 # Stats by sample:
   
-
 # Function to get cell counts per sample for a single Seurat object
 count_cells_per_sample_single <- function(seu, add_dataset_id = TRUE, cell_count_col = "cell_number") {
   meta <- seu@meta.data
@@ -714,7 +717,7 @@ write.xlsx(qc_sample_table, file = "QC.xlsx", sheetName = "sample_untreated", ro
 
 # Shared features
 
-# seurat_list_all <- readRDS('GSE161529_GSE176078_GSE167036_LambrechtPD1_GSE114727_GSE110686_GSE148673_list_qc.rds')
+seurat_list_all <- readRDS('GSE161529_GSE176078_GSE167036_LambrechtPD1_GSE114727_GSE110686_GSE148673_list_qc.rds')
 
 get_single_gene_stats <- function(seu, shared_genes) {
   dataset_name <- seu@project.name
@@ -754,6 +757,7 @@ write.table(shared_features, file = "shared_features.txt",
 
 
 # Merge
+
 
 seurat_list_qc <- readRDS('GSE161529_GSE176078_GSE167036_LambrechtPD1_GSE114727_GSE110686_GSE148673_list_qc.rds')
 merged_all <- merge(
@@ -798,6 +802,7 @@ saveRDS(integrated_all_rpca, file = "integrated161529_176078_167036_LamPD1_11472
 
 # Harmony integration
 
+
 merged_all <- readRDS('merged_161529_176078_167036_LamPD1_114727_110686_GSE148673_datasets.rds')
 integrated_all_harmony <- IntegrateLayers(
   object = merged_all,
@@ -814,10 +819,7 @@ saveRDS(integrated_all_harmony, file = "integrated161529_176078_167036_LamPD1_11
 
 
 
-# UMAP
-
-## UMAP Merged
-
+# UMAP Merged
 
 merged_all <- readRDS('merged_161529_176078_167036_LamPD1_114727_110686_GSE148673.rds')
 # Calculate the percentage of variance explained by each PC
@@ -859,9 +861,10 @@ merged_all <- RunUMAP(object = merged_all, dims = 1:co3_merged, verbose = F)
 
 
 
-## UMAP RPCA
+# Number of dims for UMAP - RPCA
 
-# integrated_all_rpca <- readRDS('integrated161529_176078_167036_LamPD1_114727_110686_GSE148673_rpca.rds')
+
+integrated_all_rpca <- readRDS('integrated161529_176078_167036_LamPD1_114727_110686_GSE148673_rpca.rds')
 
 # Extract the PC matrix from the integrated reduction
 pc_matrix_rpca <- Embeddings(integrated_all_rpca, reduction = "rpca_integrated")
@@ -881,7 +884,8 @@ co2_rpca <- sort(which((pct_var_rpca[1:length(pct_var_rpca)-1] -
 co3_rpca <- min(co1_rpca, co2_rpca) # 33
 
 
-# Elbow plot RPCA
+
+# Elbow plot:
   
 
 # # Not working because no data in integrated_all_rpca[["rpca_integrated"]]@stdev
@@ -908,23 +912,10 @@ ggplot(elbow_df_rpca, aes(x = PC, y = Variance)) +
 
 
 
-
-# UMAP RPCA
-  
-  
-integrated_all_rpca <- FindNeighbors(integrated_all_rpca, dims = 1:co3_rpca, 
-                                     verbose = F, reduction = "rpca_integrated")
-integrated_all_rpca <- FindClusters(integrated_all_rpca, verbose = F, resolution = 0.2)
-integrated_all_rpca <- RunUMAP(integrated_all_rpca, dims = 1:co3_rpca, 
-                               verbose = F, reduction = "rpca_integrated")
+# Number of dims for UMAP - Harmony
 
 
-
-## UMAP Harmony
-
-# Before running UMAP, calculate the optimal number of PCs:
-  
-# integrated_all_harmony <- readRDS('integrated161529_176078_167036_LamPD1_114727_110686_GSE148673_harmony.rds')
+integrated_all_harmony <- readRDS('integrated161529_176078_167036_LamPD1_114727_110686_GSE148673_harmony.rds')
 
 # Extract the PC matrix from the integrated reduction
 pc_matrix_harmony <- Embeddings(integrated_all_harmony, reduction = "harmony")
@@ -943,7 +934,6 @@ co2_harmony <- sort(which((pct_var_harmony[1:length(pct_var_harmony)-1] -
                     decreasing = TRUE)[1] + 1
 co3_harmony <- min(co1_harmony, co2_harmony) # 33
 
-# Elbow plot Harmony
 
 elbow_df_harmony <- data.frame(
   PC = 1:length(pct_var_harmony),
@@ -957,8 +947,25 @@ ggplot(elbow_df_harmony, aes(x = PC, y = Variance)) +
     x = "PC", y = "Variance Explained") + theme_minimal()
 
 
-# Run UMAP pipeline - Harmony
-  
+
+# Correlation between RPCA and Harmony
+
+# Correlation between SDs
+cor(pc_stdev_rpca, pc_stdev_harmony)
+
+
+
+# UMAP RPCA and Harmony
+
+
+integrated_all_rpca <- FindNeighbors(integrated_all_rpca, dims = 1:co3_rpca, 
+                                     verbose = F, reduction = "rpca_integrated")
+integrated_all_rpca <- FindClusters(integrated_all_rpca, verbose = F, resolution = 0.2)
+integrated_all_rpca <- RunUMAP(integrated_all_rpca, dims = 1:co3_rpca, 
+                               verbose = F, reduction = "rpca_integrated")
+
+
+
 integrated_all_harmony <- FindNeighbors(integrated_all_harmony, dims = 1:co3_harmony, 
                                         verbose = F, reduction = "harmony")
 integrated_all_harmony <- FindClusters(integrated_all_harmony, verbose = F, resolution = 0.2)
@@ -966,18 +973,23 @@ integrated_all_harmony <- RunUMAP(integrated_all_harmony, dims = 1:co3_harmony,
                                   verbose = F, reduction = "harmony")
 
 
+
+
 # Results
 
 ## Batch effect
 
-### By dataset
+### By datasset
+
 
 DimPlot(object = merged_all, reduction = "umap", group.by = "dataset_id") +
   ggtitle('Batches by dataset - merged')
 
 
+
 DimPlot(object = integrated_all_rpca, reduction = "umap", group.by = "dataset_id") +
   ggtitle('Batches by dataset - RPCA integrated')
+
 
 
 DimPlot(object = integrated_all_harmony, reduction = "umap", group.by = "dataset_id") +
@@ -992,8 +1004,10 @@ DimPlot(object = merged_all, reduction = "umap", group.by = "seurat_clusters") +
   ggtitle('Batches by Seurat cluster - merged')
 
 
+
 DimPlot(object = integrated_all_rpca, reduction = "umap", group.by = "seurat_clusters") +
   ggtitle('Batches by Seurat cluster - RPCA integrated')
+
 
 
 DimPlot(object = integrated_all_harmony, reduction = "umap", group.by = "seurat_clusters") +
@@ -1002,12 +1016,15 @@ DimPlot(object = integrated_all_harmony, reduction = "umap", group.by = "seurat_
 
 ### By Sample Type
 
+
 DimPlot(object = merged_all, reduction = "umap", group.by = "Sample_type")+
   ggtitle("Batches by sample type - merged")
 
 
+
 DimPlot(object = integrated_all_rpca, reduction = "umap", group.by = "Sample_type")+
   ggtitle("Batches by sample type - RPCA integrated")
+
 
 
 DimPlot(object = integrated_all_harmony, reduction = "umap", group.by = "Sample_type")+
@@ -1017,6 +1034,7 @@ DimPlot(object = integrated_all_harmony, reduction = "umap", group.by = "Sample_
 ## Cluster composition
 
 ### Samples by cluster heatmap
+
 
 cluster_sample_merged <- prop.table(table(merged_all@meta.data$seurat_clusters, 
                                           merged_all@meta.data$sample_id), margin=1) * 100
@@ -1031,6 +1049,7 @@ pheatmap(cluster_sample_merged,
 
 
 
+
 cluster_sample_rpca <- prop.table(table(integrated_all_rpca@meta.data$seurat_clusters, 
                                         integrated_all_rpca@meta.data$sample_id), margin=1) * 100
 
@@ -1041,6 +1060,7 @@ pheatmap(cluster_sample_rpca,
          angle_col = 315,
          # display_numbers = TRUE,
          main = "Cluster Composition by Sample - RPCA")
+
 
 
 
@@ -1059,6 +1079,7 @@ pheatmap(cluster_sample_harmony,
 
 ### Cells from datasets by cluster
 
+
 cluster_dataset_merged <- prop.table(table(merged_all@meta.data$seurat_clusters, 
                                            merged_all@meta.data$dataset_id), margin=1) * 100
 
@@ -1068,6 +1089,7 @@ pheatmap(t(cluster_dataset_merged),
          angle_col = 0,
          # display_numbers = TRUE,
          main = "Cluster Composition by Dataset Heatmap - Merged")
+
 
 
 cluster_dataset_merged_df <- as.data.frame(cluster_dataset_merged)
@@ -1101,8 +1123,10 @@ pheatmap(t(cluster_dataset_rpca),
          main = "Cluster Composition by Dataset Heatmap - RPCA")
 
 
+
 cluster_dataset_rpca_df <- as.data.frame(cluster_dataset_rpca)
 
+# Rename columns for clarity
 colnames(cluster_dataset_rpca_df) <- c("Cluster", "Dataset", "Percentage")
 
 # Plot
@@ -1119,6 +1143,7 @@ ggplot(cluster_dataset_rpca_df, aes(x = Cluster, y = Percentage, fill = Dataset)
 
 
 
+
 cluster_dataset_harmony <- prop.table(table(integrated_all_harmony@meta.data$seurat_clusters, 
                                             integrated_all_harmony@meta.data$dataset_id), margin=1) * 100
 
@@ -1130,11 +1155,13 @@ pheatmap(t(cluster_dataset_harmony),
          main = "Cluster Composition by Dataset Heatmap - Harmony")
 
 
+
 cluster_dataset_harmony_df <- as.data.frame(cluster_dataset_harmony)
 
+# Rename columns for clarity
 colnames(cluster_dataset_harmony_df) <- c("Cluster", "Dataset", "Percentage")
 
-
+# Plot
 ggplot(cluster_dataset_harmony_df, aes(x = Cluster, y = Percentage, fill = Dataset)) +
   geom_bar(stat = "identity") +
   ylab("% of cells in cluster") +
@@ -1326,6 +1353,7 @@ merged_all$G2M.Score <- cell_cycle_merge$G2M.Score
 merged_all$Phase <- cell_cycle_merge$Phase
 
 
+
 cell_cycle_long <- merged_all@meta.data %>%
   select(seurat_clusters, S.Score, G2M.Score) %>%
   pivot_longer(cols = c(S.Score, G2M.Score), 
@@ -1434,6 +1462,7 @@ cell_cycle_harmony <- assign_cell_cycle_phase(norm_data_harmony, s.genes, g2m.ge
 integrated_all_harmony$S.Score <- cell_cycle_harmony$S.Score
 integrated_all_harmony$G2M.Score <- cell_cycle_harmony$G2M.Score
 integrated_all_harmony$Phase <- cell_cycle_harmony$Phase
+
 
 
 cell_cycle_long_harmony <- integrated_all_harmony@meta.data %>%
