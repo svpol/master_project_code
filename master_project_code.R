@@ -1503,5 +1503,28 @@ ggplot(cell_cycle_filtered_harmony, aes(x = seurat_clusters, y = Score, fill = C
   ) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+# Find markers
+
+# Check idents
+Idents(integrated_all_rpca)
+Idents(integrated_all_harmony)
+
+
+# Find markers
+markers_rpca <- FindAllMarkers(integrated_all_rpca, only.pos = TRUE, logfc.threshold = 0.25)
+markers_harmony <- FindAllMarkers(integrated_all_harmony, only.pos = TRUE, logfc.threshold = 0.25)
+
+
+
+# Plots
+
+FeaturePlot(integrated_all_rpca, features = "PTPRC", reduction = "umap") +
+  ggtitle("CD45 in RPCA")
+
+
+
+VizDimLoadings(integrated_all_rpca, dims = 1:2, reduction = 'rpca_integrated') +
+  ggtitle('RPCA Reduction Features') + theme(plot.title = element_text(hjust = 2))
+
 
 
